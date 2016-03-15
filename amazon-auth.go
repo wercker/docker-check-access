@@ -121,7 +121,7 @@ func (a *AmazonAuth) getAuthToken() error {
 }
 
 // CheckAccess checks to see if the current amazon user has permissions defined by scope on the given repository
-func (a *AmazonAuth) CheckAccess(Repository string, scope Scope) (bool, error) {
+func (a *AmazonAuth) CheckAccess(Repository, tag string, scope Scope) (bool, error) {
 	now := time.Now().Unix()
 	if a.token == "" || now > a.tokenExpire.Unix() {
 		err := a.getAuthToken()
