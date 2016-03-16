@@ -16,15 +16,15 @@ type TokenResp struct {
 //DockerAuth implements Authenticator. It's purpose is to check whether a user has access to a Docker container by checking against a remote registry provider.
 type DockerAuth struct {
 	token       string
-	registryURL *url.URL
+	RegistryURL *url.URL
 	username    string
 	password    string
 }
 
 //NewDockerAuth is a constructor that takes in a remote registry url to check repository permission and basic authentication parameters for API calls to against a Docker Version 2 regisagainst a Docker Version 2 registry provider.
-func NewDockerAuth(registryURL *url.URL, username, password string) *DockerAuth {
+func NewDockerAuth(RegistryURL *url.URL, username, password string) *DockerAuth {
 	return &DockerAuth{
-		registryURL: registryURL,
+		RegistryURL: RegistryURL,
 		username:    username,
 		password:    password,
 	}
@@ -117,7 +117,7 @@ func (d DockerAuth) buildPullReq(repo, tag string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-	u := d.registryURL.ResolveReference(rel)
+	u := d.RegistryURL.ResolveReference(rel)
 	return http.NewRequest("GET", u.String(), nil)
 }
 
@@ -126,7 +126,7 @@ func (d DockerAuth) buildPushReq(repo string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-	u := d.registryURL.ResolveReference(rel)
+	u := d.RegistryURL.ResolveReference(rel)
 	return http.NewRequest("POST", u.String(), nil)
 }
 
