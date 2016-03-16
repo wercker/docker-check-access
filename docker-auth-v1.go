@@ -18,7 +18,7 @@ func NewDockerAuthV1(registryURL *url.URL, username, password string) *DockerAut
 	}
 }
 
-func (d *DockerAuthV1) CheckAccess(repository, tag string, scope Scope) (bool, error) {
+func (d *DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) {
 	name := normalizeRepo(repository)
 	auth := registry.BasicAuth{
 		Username: d.username,

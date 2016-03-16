@@ -52,26 +52,20 @@ func normalizeRepo(name string) string {
 func (d *DockerAuth) CheckAccess(repository, tag string, scope Scope) (bool, error) {
 	httpClient := http.DefaultClient
 	repo := normalizeRepo(repository)
-	var req *http.Request
-	var err error
-	if scope == Pull {
-		req, err = d.buildPullReq(repo, tag)
-		if err != nil {
-			return false, err
-		}
-	} else if scope == Push {
-		req, err = d.buildPushReq(repo)
-		if err != nil {
-			return false, err
-		}
+	req, err := d.getRequest(repo, tag, scope)
+	if err != nil {
+		return false, err
 	}
-	// try without auth so we can get WWW-Authenticate challenge
+
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return false, err
 	}
 	defer resp.Body.Close()
 	//handle authErrors
+	if resp.StatusCode == 404 {
+		return false, ErrRepoNotFound
+	}
 	if resp.StatusCode == 401 {
 		authString := resp.Header.Get("Www-Authenticate")
 		parts := strings.Split(authString, " ")
@@ -98,22 +92,39 @@ func (d *DockerAuth) CheckAccess(repository, tag string, scope Scope) (bool, err
 			return false, err
 		}
 		//now we have a token, so we try the pull request again
-		req, err = d.buildPullReq(repo, tag)
+		req, err := d.getRequest(repo, tag, scope)
+		if err != nil {
+			return false, err
+		}
 		d.authenticate(req)
 		resp, err := httpClient.Do(req)
 		if err != nil {
 			return false, err
 		}
 		defer resp.Body.Close()
-		if resp.StatusCode == 200 {
+		statusCode := resp.StatusCode
+		if statusCode == 200 || statusCode == 202 {
 			return true, nil
+		}
+
+		if resp.StatusCode == 404 {
+			return false, ErrRepoNotFound
 		}
 	}
 	return false, ErrUnexpectedResponse
 }
 
-func (d DockerAuth) buildPullReq(repo, tag string) (*http.Request, error) {
-	rel, err := url.Parse(fmt.Sprintf("/v2/%s/manifests/%s", repo, tag))
+//gives you proper request based on repo tag and scope
+func (d DockerAuth) getRequest(repo, tag string, scope Scope) (*http.Request, error) {
+	if scope == Pull {
+		return d.buildPullReq(repo, tag)
+	} else {
+		return d.buildPushReq(repo)
+	}
+}
+
+func (d DockerAuth) buildPullReq(repo string) (*http.Request, error) {
+	rel, err := url.Parse(fmt.Sprintf("/v2/%s/tags/list", repo))
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +133,7 @@ func (d DockerAuth) buildPullReq(repo, tag string) (*http.Request, error) {
 }
 
 func (d DockerAuth) buildPushReq(repo string) (*http.Request, error) {
-	rel, err := url.Parse(fmt.Sprintf("/v2/%s/blobs/uploads", repo))
+	rel, err := url.Parse(fmt.Sprintf("/v2/%s/blobs/uploads/", repo))
 	if err != nil {
 		return nil, err
 	}
