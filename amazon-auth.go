@@ -120,6 +120,19 @@ func (a *AmazonAuth) getAuthToken() error {
 	return nil
 }
 
+//GetToken is a getter for the private member token in struct AmazonAuth
+//useful if you want to use the token in calls to a remote docker API
+func (a AmazonAuth) GetToken() string {
+	now := time.Now().Unix()
+	if a.token == "" || now > a.tokenExpire.Unix() {
+		err := a.getAuthToken()
+		if err != nil {
+			return ""
+		}
+	}
+	return a.token
+}
+
 // CheckAccess checks to see if the current amazon user has permissions defined by scope on the given repository
 func (a *AmazonAuth) CheckAccess(Repository string, scope Scope) (bool, error) {
 	now := time.Now().Unix()
