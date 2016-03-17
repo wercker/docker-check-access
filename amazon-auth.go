@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -131,6 +132,11 @@ func (a AmazonAuth) GetToken() string {
 		}
 	}
 	return a.token
+}
+
+//GetRepo returns the name of a full amazon ECR repository. It is useful when using making calls to a remote Docker API
+func (a AmazonAuth) GetRepo(repo string) string {
+	return fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com/%s", a.registryID, a.region, repo)
 }
 
 // CheckAccess checks to see if the current amazon user has permissions defined by scope on the given repository
