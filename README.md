@@ -11,7 +11,7 @@ package modify
 
 import (
     "github.com/fsouza/go-dockerclient"
-	"github.com/wercker/docker-check-access/authenticator"
+	"github.com/wercker/docker-check-access"
 )
 
 func ModifyLocalContainer(auth auth.Authenticator, container *docker.Container) error {
