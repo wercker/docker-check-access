@@ -1,0 +1,39 @@
+hash: 2b9ee561e3f1e6c0f3bdddd1ec41112f272d0d8912422d0b1eebcdbf90d2944c
+updated: 2016-03-17T16:49:09.691576292-07:00
+imports:
+- name: github.com/aws/aws-sdk-go
+  version: 6a5db7c4ffe484f74f8661d919b2a3ef1fd621f7
+  subpackages:
+  - aws
+  - aws/credentials
+  - aws/session
+  - service/ecr
+  - service/iam
+  - aws/awserr
+  - aws/client
+  - aws/corehandlers
+  - aws/defaults
+  - aws/request
+  - private/endpoints
+  - aws/awsutil
+  - aws/client/metadata
+  - private/protocol/jsonrpc
+  - private/signer/v4
+  - private/protocol
+  - private/protocol/query
+  - private/waiter
+  - aws/credentials/ec2rolecreds
+  - aws/ec2metadata
+  - private/protocol/json/jsonutil
+  - private/protocol/rest
+  - private/protocol/query/queryutil
+  - private/protocol/xml/xmlutil
+- name: github.com/CenturyLinkLabs/docker-reg-client
+  version: 4bc892c78c562916189aaa1a0edd43e194dc60b3
+  subpackages:
+  - registry
+- name: github.com/go-ini/ini
+  version: 776aa739ce9373377cd16f526cdf06cb4c89b40f
+- name: github.com/jmespath/go-jmespath
+  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+devImports: []
