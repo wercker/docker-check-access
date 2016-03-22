@@ -32,12 +32,26 @@ func NewDockerAuth(RegistryURL *url.URL, username, password string) *DockerAuth 
 	}
 }
 
+func (d DockerAuth) normalizeRepo(repository string) (string, error) {
+	n, err := reference.WithName(repository)
+	if err != nil {
+		return "", err
+	}
+	return n.RemoteName(), nil
+}
+
 //CheckAccess takes a repository and tries to get a JWT token from a docker registry 2 provider, if it succeeds in getting the token, we return true. If there is a failure grabbing the token, we return false and an error explaning what went wrong.
 //CheckAccess uses the following flow to get the token: https://docs.docker.com/registry/spec/auth/jwt/A
 //Meaning, it tries to make a call with basic auth parameters, and if that doesn't work it tries to request a token from the challenge in the Www-Authenticate header.
 func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 	httpClient := http.DefaultClient
-	req, err := d.getRequest(repository, scope)
+
+	repo, err := d.normalizeRepo(repository)
+	if err != nil {
+		return false, err
+	}
+
+	req, err := d.getRequest(repo, scope)
 	if err != nil {
 		return false, err
 	}
@@ -76,8 +90,8 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		//now we have a token, so we try the pull request again
-		req, err := d.getRequest(repository, scope)
+		//now we have a token, so we try the request again
+		req, err := d.getRequest(repo, scope)
 		if err != nil {
 			return false, err
 		}
