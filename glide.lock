@@ -1,8 +1,8 @@
-hash: 2b9ee561e3f1e6c0f3bdddd1ec41112f272d0d8912422d0b1eebcdbf90d2944c
-updated: 2016-03-17T16:49:09.691576292-07:00
+hash: a45f91c5e726fd1c0ed06f4ff10f6a7464e31ab5591cbf0e1441fe9f68bc413e
+updated: 2016-03-22T14:02:51.679505155-07:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 6a5db7c4ffe484f74f8661d919b2a3ef1fd621f7
+  version: d242aa2d507deb5148f5f69b6a80344200b968c2
   subpackages:
   - aws
   - aws/credentials
@@ -32,8 +32,70 @@ imports:
   version: 4bc892c78c562916189aaa1a0edd43e194dc60b3
   subpackages:
   - registry
+- name: github.com/docker/distribution
+  version: c8d8e7e357a1e5cf39aec1cfd4b3aef82414b3fc
+  subpackages:
+  - digest
+  - reference
+- name: github.com/docker/docker
+  version: 53d2e5e9d754ce8fbef733759e9ec450514133e3
+  subpackages:
+  - reference
+  - image
+  - image/v1
+  - layer
+  - pkg/version
+  - daemon/graphdriver
+  - pkg/archive
+  - pkg/idtools
+  - pkg/ioutils
+  - pkg/stringid
+  - pkg/chrootarchive
+  - pkg/plugins
+  - pkg/fileutils
+  - pkg/pools
+  - pkg/promise
+  - pkg/system
+  - pkg/longpath
+  - pkg/random
+  - pkg/reexec
+  - pkg/plugins/transport
+- name: github.com/docker/engine-api
+  version: 9524d7ae81ff55771852b6269f40f2a878315de9
+  subpackages:
+  - types/container
+  - types/blkiodev
+  - types/strslice
+- name: github.com/docker/go-connections
+  version: f549a9393d05688dff0992ef3efd8bbe6c628aeb
+  subpackages:
+  - nat
+  - sockets
+  - tlsconfig
+- name: github.com/docker/go-units
+  version: 5d2041e26a699eaca682e2ea41c8f891e1060444
 - name: github.com/go-ini/ini
-  version: 776aa739ce9373377cd16f526cdf06cb4c89b40f
+  version: 12f418cc7edc5a618a51407b7ac1f1f512139df3
 - name: github.com/jmespath/go-jmespath
   version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+- name: github.com/Microsoft/go-winio
+  version: 8f9387ea7efabb228a981b9c381142be7667967f
+- name: github.com/opencontainers/runc
+  version: a35f90798372b6915ceecfcb891da6bd82299a79
+  subpackages:
+  - libcontainer/user
+- name: github.com/Sirupsen/logrus
+  version: 55eb11d21d2a31a3cc93838241d04800f52e823d
+- name: github.com/vbatts/tar-split
+  version: e2a62d6b0d98fd7f1a57646812c74564fda999b4
+  subpackages:
+  - tar/asm
+  - tar/storage
+  - archive/tar
+- name: golang.org/x/net
+  version: 2cba614e8ff920c60240d2677bc019af32ee04e5
+  subpackages:
+  - context
+  - trace
+  - proxy
 devImports: []

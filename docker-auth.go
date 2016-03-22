@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/docker/docker/reference"
 )
 
 type TokenResp struct {
@@ -30,29 +32,12 @@ func NewDockerAuth(RegistryURL *url.URL, username, password string) *DockerAuth 
 	}
 }
 
-//quay.io/wercker/badasscontainer -> wercker/badasscontainer
-//wecker/badass -> wercker/badass
-//see : https://github.com/wercker/wercker/blob/master/docker/docker.go#L283#L297
-func normalizeRepo(name string) string {
-	parts := strings.Split(name, "/")
-	if len(parts) == 1 {
-		return name
-	}
-
-	for strings.Contains(parts[0], ".") {
-		parts = parts[1:]
-	}
-
-	return strings.Join(parts, "/")
-}
-
 //CheckAccess takes a repository and tries to get a JWT token from a docker registry 2 provider, if it succeeds in getting the token, we return true. If there is a failure grabbing the token, we return false and an error explaning what went wrong.
 //CheckAccess uses the following flow to get the token: https://docs.docker.com/registry/spec/auth/jwt/A
 //Meaning, it tries to make a call with basic auth parameters, and if that doesn't work it tries to request a token from the challenge in the Www-Authenticate header.
 func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 	httpClient := http.DefaultClient
-	repo := normalizeRepo(repository)
-	req, err := d.getRequest(repo, scope)
+	req, err := d.getRequest(repository, scope)
 	if err != nil {
 		return false, err
 	}
@@ -92,7 +77,7 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 			return false, err
 		}
 		//now we have a token, so we try the pull request again
-		req, err := d.getRequest(repo, scope)
+		req, err := d.getRequest(repository, scope)
 		if err != nil {
 			return false, err
 		}
@@ -112,6 +97,19 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 		}
 	}
 	return false, ErrUnexpectedResponse
+}
+
+func (d DockerAuth) Username() string {
+	return d.username
+}
+
+func (d DockerAuth) Password() string {
+	return d.password
+}
+
+func (d DockerAuth) Repository(repo string) string {
+	n, _ := reference.WithName(repo)
+	return n.FullName()
 }
 
 //gives you proper request based on repo tag and scope
