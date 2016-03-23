@@ -121,7 +121,7 @@ func (a *AmazonAuth) getAuthToken() error {
 	return nil
 }
 
-//GetToken is a getter for the private member token in struct AmazonAuth
+//Password is a getter for the private member token in struct AmazonAuth
 //useful if you want to use the token in calls to a remote docker API
 func (a AmazonAuth) Password() string {
 	now := time.Now().Unix()
@@ -139,7 +139,7 @@ func (a AmazonAuth) Username() string {
 }
 
 //GetRepo returns the name of a full amazon ECR repository. It is useful when using making calls to a remote Docker API
-func (a AmazonAuth) Repositroy(repo string) string {
+func (a AmazonAuth) Repository(repo string) string {
 	return fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com/%s", a.registryID, a.region, repo)
 }
 
