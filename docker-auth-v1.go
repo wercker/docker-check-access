@@ -38,7 +38,7 @@ func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) 
 		}
 	} else if scope == Pull {
 		if d.username != "" {
-			token, err := client.Hub.GetReadTokenWithAuth(name, auth)
+			_, err := client.Hub.GetReadTokenWithAuth(name, auth)
 			if err != nil {
 				return false, err
 			}
