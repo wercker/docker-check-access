@@ -38,12 +38,11 @@ func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) 
 		}
 	} else if scope == Pull {
 		if d.username != "" {
-			if _, err := client.Hub.GetReadTokenWithAuth(name, auth); err != nil {
-				if err.Error() == "Server returned status 401" || err.Error() == "Server returned status 403" {
-					return false, nil
-				}
+			token, err := client.Hub.GetReadTokenWithAuth(name, auth)
+			if err != nil {
 				return false, err
 			}
+			return true, nil
 		} else {
 			if _, err := client.Hub.GetReadToken(name); err != nil {
 				if err.Error() == "Server returned status 401" || err.Error() == "Server returned status 403" {
