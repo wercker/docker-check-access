@@ -30,7 +30,7 @@ func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) 
 	client := registry.NewClient()
 	client.BaseURL = d.RegistryURL
 	if scope == Push {
-		_, err := client.Hub.GetReadTokenWithAuth(name, auth)
+		_, err := client.Hub.GetWriteToken(name, auth)
 		if err != nil {
 			return false, err
 		}
@@ -43,12 +43,11 @@ func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) 
 			}
 			return true, nil
 		} else {
-			if _, err := client.Hub.GetReadToken(name); err != nil {
-				if err.Error() == "Server returned status 401" || err.Error() == "Server returned status 403" {
-					return false, nil
-				}
+			_, err := client.Hub.GetReadToken(name)
+			if err != nil {
 				return false, err
 			}
+			return true, nil
 		}
 	}
 	return true, nil
