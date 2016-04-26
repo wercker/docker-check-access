@@ -1,7 +1,5 @@
 package: github.com/wercker/docker-check-access
 import:
-  - package: github.com/CenturyLinkLabs/docker-reg-client
-    ref:     48a0d17a5fd338a0cdc6949514fff8b84ddf70d4
-    vcs:     git
+  - package: github.com/wercker/docker-reg-client
   - package: github.com/aws/aws-sdk-go
   - package: github.com/docker/docker/reference

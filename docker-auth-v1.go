@@ -3,7 +3,7 @@ package auth
 import (
 	"net/url"
 
-	"github.com/CenturyLinkLabs/docker-reg-client/registry"
+	"github.com/wercker/docker-reg-client/registry"
 )
 
 //DockerAuthV1 implements Authenticator. It's purpose is to check whether a user has access to a Docker container by checking against a remote registry provider that still uses the Docker Version 1 registry specification.
