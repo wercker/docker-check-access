@@ -1,5 +1,0 @@
-package: github.com/wercker/docker-check-access
-import:
-  - package: github.com/wercker/docker-reg-client
-  - package: github.com/aws/aws-sdk-go
-  - package: github.com/docker/docker/reference
