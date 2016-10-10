@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -45,6 +46,9 @@ func (d DockerAuth) normalizeRepo(repository string) (string, error) {
 //Meaning, it tries to make a call with basic auth parameters, and if that doesn't work it tries to request a token from the challenge in the Www-Authenticate header.
 func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 	httpClient := http.DefaultClient
+	httpDefaultTransport := http.DefaultTransport
+	httpDefaultTransport.(*http.Transport).TLSNextProto = map[string](func(authority string, c *tls.Conn) http.RoundTripper){}
+	httpClient.Transport = httpDefaultTransport
 
 	repo, err := d.normalizeRepo(repository)
 	if err != nil {
