@@ -8,10 +8,6 @@ import (
 )
 
 type Azure struct {
-	clientID          string
-	clientSecret      string
-	subscriptionID    string
-	tenantID          string
 	resourceGroupName string
 	registryName      string
 	registryURL       string
@@ -21,24 +17,15 @@ type Azure struct {
 }
 
 func NewAzure(clientID, clientSecret, subscriptionID, tenantID, resourceGroupName, registryName, registryURL string) (*Azure, error) {
-	c := map[string]string{
-		"AZURE_CLIENT_ID":       clientID,
-		"AZURE_CLIENT_SECRET":   clientSecret,
-		"AZURE_SUBSCRIPTION_ID": subscriptionID,
-		"AZURE_TENANT_ID":       tenantID,
-	}
 
-	spt, err := newServicePrincipalTokenFromCredentials(c, azure.PublicCloud.ResourceManagerEndpoint)
+	spt, err := newServicePrincipalTokenFromCredentials(clientID, clientSecret, tenantID, azure.PublicCloud.ResourceManagerEndpoint)
+
 	if err != nil {
 		return nil, err
 	}
-	regClient := containerregistry.NewRegistriesClient(c["AZURE_SUBSCRIPTION_ID"])
+	regClient := containerregistry.NewRegistriesClient(subscriptionID)
 	regClient.Authorizer = spt
 	return &Azure{
-		clientID:          clientID,
-		clientSecret:      clientSecret,
-		subscriptionID:    subscriptionID,
-		tenantID:          tenantID,
 		resourceGroupName: resourceGroupName,
 		registryName:      registryName,
 		registryURL:       registryURL,
@@ -85,10 +72,10 @@ func (a *Azure) Repository(repository string) string {
 	return fmt.Sprintf("%s/%s", a.registryURL, repository)
 }
 
-func newServicePrincipalTokenFromCredentials(c map[string]string, scope string) (*azure.ServicePrincipalToken, error) {
-	oauthConfig, err := azure.PublicCloud.OAuthConfigForTenant(c["AZURE_TENANT_ID"])
+func newServicePrincipalTokenFromCredentials(clientID, clientSecret, tenantID, scope string) (*azure.ServicePrincipalToken, error) {
+	oauthConfig, err := azure.PublicCloud.OAuthConfigForTenant(tenantID)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return azure.NewServicePrincipalToken(*oauthConfig, c["AZURE_CLIENT_ID"], c["AZURE_CLIENT_SECRET"], scope)
+	return azure.NewServicePrincipalToken(*oauthConfig, clientID, clientSecret, scope)
 }
