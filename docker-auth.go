@@ -110,6 +110,12 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 			return false, ErrRepoNotFound
 		}
 	}
+	// if the remote server gives us the go ahead, we're fine
+	// used for registries like GCR which might use some other sort of authz strategy
+	if resp.StatusCode == 200 || resp.StatusCode == 202 {
+		return true, nil
+
+	}
 	return false, ErrUnexpectedResponse
 }
 
