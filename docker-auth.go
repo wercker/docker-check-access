@@ -32,7 +32,7 @@ func NewDockerAuth(RegistryURL *url.URL, username, password string) *DockerAuth 
 	}
 }
 
-func (d DockerAuth) normalizeRepo(repository string) (string, error) {
+func (d *DockerAuth) normalizeRepo(repository string) (string, error) {
 	n, err := reference.WithName(repository)
 	if err != nil {
 		return "", err
@@ -119,21 +119,21 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 	return false, ErrUnexpectedResponse
 }
 
-func (d DockerAuth) Username() string {
+func (d *DockerAuth) Username() string {
 	return d.username
 }
 
-func (d DockerAuth) Password() string {
+func (d *DockerAuth) Password() string {
 	return d.password
 }
 
-func (d DockerAuth) Repository(repo string) string {
+func (d *DockerAuth) Repository(repo string) string {
 	n, _ := reference.WithName(repo)
 	return n.FullName()
 }
 
 //gives you proper request based on repo tag and scope
-func (d DockerAuth) getRequest(repo string, scope Scope) (*http.Request, error) {
+func (d *DockerAuth) getRequest(repo string, scope Scope) (*http.Request, error) {
 	if scope == Pull {
 		return d.buildPullReq(repo)
 	} else {
@@ -141,7 +141,7 @@ func (d DockerAuth) getRequest(repo string, scope Scope) (*http.Request, error) 
 	}
 }
 
-func (d DockerAuth) buildPullReq(repo string) (*http.Request, error) {
+func (d *DockerAuth) buildPullReq(repo string) (*http.Request, error) {
 	rel, err := url.Parse(fmt.Sprintf("/v2/%s/tags/list", repo))
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (d DockerAuth) buildPullReq(repo string) (*http.Request, error) {
 	return http.NewRequest("GET", u.String(), nil)
 }
 
-func (d DockerAuth) buildPushReq(repo string) (*http.Request, error) {
+func (d *DockerAuth) buildPushReq(repo string) (*http.Request, error) {
 	rel, err := url.Parse(fmt.Sprintf("/v2/%s/blobs/uploads/", repo))
 	if err != nil {
 		return nil, err
