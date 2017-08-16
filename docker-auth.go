@@ -195,12 +195,12 @@ func (d *DockerAuth) getToken(realm, service, scope string) error {
 		return err
 	}
 	defer resp.Body.Close()
+
 	var T TokenResp
 	json.NewDecoder(resp.Body).Decode(&T)
 	d.token = T.Token
-	//
 	if d.token == "" {
-		return errors.New("No Token found")
+		return errors.New("Authentication failed")
 	}
 	return nil
 }
