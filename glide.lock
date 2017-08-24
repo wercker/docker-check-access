@@ -1,36 +1,36 @@
-hash: 9bc43638aabd3735c51567fe226ebda004eaf386efcc9c17f86739368330db9e
-updated: 2017-01-18T23:53:42.138560051-08:00
+hash: 9947ba503decbbc7a93fbcd852ac9da0be6e131004f733da7a9074e4e18da2c7
+updated: 2017-08-24T16:34:32.364867187+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 2669c2336f87952c54c236e2fecfab3331176c79
+  version: 826ec2077453adc020e9836a15fa704de931b4e6
   subpackages:
   - aws
-  - aws/credentials
-  - aws/session
-  - service/ecr
-  - service/iam
   - aws/awserr
-  - aws/endpoints
-  - aws/client
-  - aws/corehandlers
-  - aws/credentials/stscreds
-  - aws/defaults
-  - aws/request
   - aws/awsutil
+  - aws/client
   - aws/client/metadata
-  - aws/signer/v4
-  - private/protocol/jsonrpc
-  - private/protocol
-  - private/protocol/query
-  - private/waiter
-  - service/sts
+  - aws/corehandlers
+  - aws/credentials
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
+  - aws/credentials/stscreds
+  - aws/defaults
   - aws/ec2metadata
-  - private/protocol/rest
+  - aws/endpoints
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - internal/shareddefaults
+  - private/protocol
   - private/protocol/json/jsonutil
+  - private/protocol/jsonrpc
+  - private/protocol/query
   - private/protocol/query/queryutil
+  - private/protocol/rest
   - private/protocol/xml/xmlutil
+  - service/ecr
+  - service/iam
+  - service/sts
 - name: github.com/Azure/azure-sdk-for-go
   version: d05c22dc3f9fdd2ec6e3593839fdd44df17f2de5
   subpackages:
@@ -38,38 +38,26 @@ imports:
 - name: github.com/Azure/go-autorest
   version: 0c7d3adb1d6992a173eedd673f44698fe2c901be
   subpackages:
-  - autorest/azure
   - autorest
+  - autorest/azure
   - autorest/date
   - autorest/to
   - autorest/validation
 - name: github.com/dgrijalva/jwt-go
-  version: a601269ab70c205d26370c16f7c81e9017c14e04
+  version: a539ee1a749a2b895533f979515ac7e6e0f5b650
 - name: github.com/docker/distribution
-  version: 96b02e885afaebf6aff5c7fff5d4f9563a35c432
+  version: 5f6282db7d65e6d72ad7c2cc66310724a57be716
   subpackages:
-  - reference
   - digestset
-- name: github.com/docker/docker
-  version: 7d0041f9e5dce58366a3ce09e75d82ce307cf28a
-  subpackages:
   - reference
-  - pkg/ioutils
-  - pkg/stringid
-  - pkg/longpath
-  - pkg/random
 - name: github.com/go-ini/ini
-  version: 766e555c68dc8bda90d197ee8946c37519c19409
+  version: c787282c39ac1fc618827141a1f762240def08a3
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/opencontainers/go-digest
-  version: 21dfd564fd89c944783d00d069f33e3e7123c448
+  version: 279bed98673dd5bef374d3b6e4b09e2af76183bf
 - name: github.com/wercker/docker-reg-client
   version: 290be6ffcbe21d8097a4124bb630bbf4a52d9e7e
   subpackages:
   - registry
-- name: golang.org/x/net
-  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
-  subpackages:
-  - context
-devImports: []
+testImports: []
