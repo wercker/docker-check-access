@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/docker/docker/reference"
+	"github.com/docker/distribution/reference"
 )
 
 type TokenResp struct {
@@ -33,11 +33,11 @@ func NewDockerAuth(RegistryURL *url.URL, username, password string) *DockerAuth 
 }
 
 func (d *DockerAuth) normalizeRepo(repository string) (string, error) {
-	n, err := reference.WithName(repository)
+	n, err := reference.ParseNormalizedNamed(repository)
 	if err != nil {
 		return "", err
 	}
-	return n.RemoteName(), nil
+	return reference.Path(n), nil
 }
 
 //CheckAccess takes a repository and tries to get a JWT token from a docker registry 2 provider, if it succeeds in getting the token, we return true. If there is a failure grabbing the token, we return false and an error explaning what went wrong.
@@ -128,8 +128,8 @@ func (d *DockerAuth) Password() string {
 }
 
 func (d *DockerAuth) Repository(repo string) string {
-	n, _ := reference.WithName(repo)
-	return n.FullName()
+	n, _ := reference.ParseNormalizedNamed(repo)
+	return n.Name()
 }
 
 //gives you proper request based on repo tag and scope
