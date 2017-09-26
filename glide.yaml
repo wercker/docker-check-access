@@ -13,3 +13,6 @@ import:
   version: 0c7d3adb1d6992a173eedd673f44698fe2c901be
   subpackages:
   - autorest/azure
+- package: github.com/davecgh/go-spew
+  subpackages:
+  - spew

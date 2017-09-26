@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/docker/distribution/reference"
 )
@@ -198,6 +201,7 @@ func (d *DockerAuth) getToken(realm, service, scope string) error {
 
 	var T TokenResp
 	json.NewDecoder(resp.Body).Decode(&T)
+	log.Println("%s", spew.Sdump(T))
 	d.token = T.Token
 	if d.token == "" {
 		return errors.New("Authentication failed")
