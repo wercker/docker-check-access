@@ -105,6 +105,7 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 		}
 		defer resp.Body.Close()
 		statusCode := resp.StatusCode
+		log.Println(spew.Sdump(resp))
 		if statusCode == 200 || statusCode == 202 {
 			return true, nil
 		}
