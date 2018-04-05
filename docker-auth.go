@@ -55,7 +55,7 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
+	d.authenticate(req)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return false, err
@@ -101,13 +101,16 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 			return false, err
 		}
 		defer resp.Body.Close()
-		statusCode := resp.StatusCode
-		if statusCode == 200 || statusCode == 202 {
+		if resp.StatusCode == 200 || resp.StatusCode == 202 {
 			return true, nil
 		}
 
 		if resp.StatusCode == 404 {
 			return false, ErrRepoNotFound
+		}
+
+		if resp.StatusCode == 401 {
+			return false, ErrRepoNotAuthorized
 		}
 	}
 	// if the remote server gives us the go ahead, we're fine
