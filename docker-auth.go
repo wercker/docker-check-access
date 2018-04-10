@@ -41,8 +41,9 @@ func (d *DockerAuth) normalizeRepo(repository string) (string, error) {
 }
 
 //CheckAccess takes a repository and tries to get a JWT token from a docker registry 2 provider, if it succeeds in getting the token, we return true. If there is a failure grabbing the token, we return false and an error explaning what went wrong.
-//CheckAccess uses the following flow to get the token: https://docs.docker.com/registry/spec/auth/jwt/A
-//Meaning, it tries to make a call with basic auth parameters, and if that doesn't work it tries to request a token from the challenge in the Www-Authenticate header.
+//CheckAccess uses the following flow to get the token: https://docs.docker.com/registry/spec/auth/jwt
+//Meaning, it first makes a call without any authentication/authorization parameters to check if the registry
+//requires any authentication at all, and if that doesn't work it tries to request a token from the challenge in the Www-Authenticate header.
 func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 	httpClient := http.DefaultClient
 
@@ -55,7 +56,6 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return false, err
@@ -101,13 +101,16 @@ func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
 			return false, err
 		}
 		defer resp.Body.Close()
-		statusCode := resp.StatusCode
-		if statusCode == 200 || statusCode == 202 {
+		if resp.StatusCode == 200 || resp.StatusCode == 202 {
 			return true, nil
 		}
 
 		if resp.StatusCode == 404 {
 			return false, ErrRepoNotFound
+		}
+
+		if resp.StatusCode == 401 {
+			return false, ErrRepoNotAuthorized
 		}
 	}
 	// if the remote server gives us the go ahead, we're fine
