@@ -196,7 +196,6 @@ func (d *DockerAuth) getToken(realm, service, scope string) error {
 	}
 	encoded := v.Encode()
 	urlString := realm + "?" + encoded
-	fmt.Println(urlString)
 	req, err := http.NewRequest("GET", urlString, nil)
 	if err != nil {
 		return err
