@@ -11,8 +11,11 @@ import (
 	"github.com/docker/distribution/reference"
 )
 
+//TokenResp - Contains access token returned from the docker registry after successful authn and authz.
+// access token field name can be either "token" or "access_token" in json returned by the registry
 type TokenResp struct {
-	Token string `json:"token"`
+	Token       string `json:"token"`
+	AccessToken string `json:"access_token"`
 }
 
 //DockerAuth implements Authenticator. It's purpose is to check whether a user has access to a Docker container by checking against a remote registry provider.
@@ -21,6 +24,14 @@ type DockerAuth struct {
 	RegistryURL *url.URL
 	username    string
 	password    string
+}
+
+//GetToken - Returns token string from TokenResp
+func (resp TokenResp) GetToken() string {
+	if resp.Token != "" {
+		return resp.Token
+	}
+	return resp.AccessToken
 }
 
 //NewDockerAuth is a constructor that takes in a remote registry url to check repository permission and basic authentication parameters for API calls to against a Docker Version 2 regisagainst a Docker Version 2 registry provider.
@@ -185,6 +196,7 @@ func (d *DockerAuth) getToken(realm, service, scope string) error {
 	}
 	encoded := v.Encode()
 	urlString := realm + "?" + encoded
+	fmt.Println(urlString)
 	req, err := http.NewRequest("GET", urlString, nil)
 	if err != nil {
 		return err
@@ -193,6 +205,7 @@ func (d *DockerAuth) getToken(realm, service, scope string) error {
 	if d.username != "" && d.password != "" {
 		req.SetBasicAuth(d.username, d.password)
 	}
+	fmt.Println(req.Header.Get("Authorization"))
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -201,7 +214,7 @@ func (d *DockerAuth) getToken(realm, service, scope string) error {
 
 	var T TokenResp
 	json.NewDecoder(resp.Body).Decode(&T)
-	d.token = T.Token
+	d.token = T.GetToken()
 	if d.token == "" {
 		return errors.New("Authentication failed")
 	}

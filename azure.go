@@ -2,7 +2,10 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/url"
+
 	"github.com/Azure/azure-sdk-for-go/services/authorization/mgmt/2015-07-01/authorization"
 	"github.com/Azure/azure-sdk-for-go/services/containerregistry/mgmt/2017-10-01/containerregistry"
 	"github.com/Azure/go-autorest/autorest"
@@ -10,10 +13,11 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 )
 
+//Azure - struct containing all the fields required for authentication with azure container registry
 type Azure struct {
 	resourceGroupName string
 	registryName      string
-	registryURL       string
+	loginServer       string
 	subscriptionID    string
 	authorizer        autorest.Authorizer
 	regClient         containerregistry.RegistriesClient
@@ -22,18 +26,18 @@ type Azure struct {
 	dockerPassword    string
 }
 
-func NewAzure(clientID, clientSecret, subscriptionID, tenantID, resourceGroupName, registryName, registryURL string) (*Azure, error) {
-
+//NewAzure - Creates ServicePrincipleToken and a BearerAuthorizer from it and populates an Azure struct
+func NewAzure(clientID, clientSecret, subscriptionID, tenantID, resourceGroupName, registryName, loginServer string) (*Azure, error) {
 	spt, err := newServicePrincipalTokenFromCredentials(clientID, clientSecret, tenantID, azure.PublicCloud.ResourceManagerEndpoint)
-
 	if err != nil {
 		return nil, err
 	}
+
 	authorizer := autorest.NewBearerAuthorizer(spt)
 	return &Azure{
 		resourceGroupName: resourceGroupName,
 		registryName:      registryName,
-		registryURL:       registryURL,
+		loginServer:       loginServer,
 		subscriptionID:    subscriptionID,
 		authorizer:        authorizer,
 		dockerUsername:    clientID,
@@ -41,6 +45,9 @@ func NewAzure(clientID, clientSecret, subscriptionID, tenantID, resourceGroupNam
 	}, nil
 }
 
+//CheckAccess - makes a call to Azure to get the registry information.
+// If that succeedes. check push access to registry as a standard v2 repository
+// using DockerAuth
 func (a *Azure) CheckAccess(Repository string, scope Scope) (bool, error) {
 	regClient := containerregistry.NewRegistriesClient(a.subscriptionID)
 	regClient.Authorizer = a.authorizer
@@ -49,37 +56,43 @@ func (a *Azure) CheckAccess(Repository string, scope Scope) (bool, error) {
 		return false, err
 	}
 
-	roleClient := authorization.NewRoleAssignmentsClient(a.subscriptionID)
-	roleClient.Authorizer = a.authorizer
+	if *registry.LoginServer != a.loginServer {
+		return false, errors.New("LoginServer in azure " + *registry.Name + " not same as provided in input: " + a.loginServer)
+	}
 
-	rolesIt, err := roleClient.ListForResourceComplete(context.Background(), a.resourceGroupName, "Microsoft.ContainerRegistry", *(registry.ID), *(registry.Type), *(registry.Name), "atScope()")
+	//Now validate push access to registry using clientId and clientSecret
+	dockerAuth := &DockerAuth{username: a.Username(), password: a.Password()}
+	regURL, err := url.Parse("https://" + a.loginServer + "/v2/")
 	if err != nil {
 		return false, err
 	}
 
-	canAccess := false
-	for role := rolesIt.Value(); rolesIt.NotDone(); rolesIt.Next() {
-		if scope == Pull && (*(role.Name) == "Reader" || *(role.Name) == "Contributor") {
-			canAccess = true
-			break
-		} else if scope == Push && *(role.Name) == "Contributor" {
-			canAccess = true
-			break
-		}
+	dockerAuth.RegistryURL = regURL
+	ok, err := dockerAuth.CheckAccess(Repository, scope)
+	if err != nil {
+		return false, err
 	}
 
-	return canAccess, nil
+	if !ok {
+		return false, errors.New("No push access to the registry")
+	}
+
+	return true, nil
 }
 
+//Password - returns password for the registry (clientSecret)
 func (a *Azure) Password() string {
 	return a.dockerPassword
 }
+
+//Username - returns username for the registry (cliendId)
 func (a *Azure) Username() string {
 	return a.dockerUsername
 }
 
+//Repository - returns "taggable" repository name
 func (a *Azure) Repository(repository string) string {
-	return fmt.Sprintf("%s/%s", a.registryURL, repository)
+	return fmt.Sprintf("%s/%s", a.loginServer, repository)
 }
 
 func newServicePrincipalTokenFromCredentials(clientID, clientSecret, tenantID, scope string) (*adal.ServicePrincipalToken, error) {
