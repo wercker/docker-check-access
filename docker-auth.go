@@ -205,7 +205,6 @@ func (d *DockerAuth) getToken(realm, service, scope string) error {
 	if d.username != "" && d.password != "" {
 		req.SetBasicAuth(d.username, d.password)
 	}
-	fmt.Println(req.Header.Get("Authorization"))
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
