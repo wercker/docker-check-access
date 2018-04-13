@@ -13,7 +13,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 )
 
-//Azure - struct containing all the fields required for authentication with azure container registry
+//Azure struct containing all the fields required for authentication with azure container registry
 type Azure struct {
 	resourceGroupName string
 	registryName      string
@@ -26,7 +26,7 @@ type Azure struct {
 	dockerPassword    string
 }
 
-//NewAzure - Creates ServicePrincipleToken and a BearerAuthorizer from it and populates an Azure struct
+//NewAzure creates ServicePrincipleToken and a BearerAuthorizer from it and populates an Azure struct
 func NewAzure(clientID, clientSecret, subscriptionID, tenantID, resourceGroupName, registryName, loginServer string) (*Azure, error) {
 	spt, err := newServicePrincipalTokenFromCredentials(clientID, clientSecret, tenantID, azure.PublicCloud.ResourceManagerEndpoint)
 	if err != nil {
@@ -45,7 +45,7 @@ func NewAzure(clientID, clientSecret, subscriptionID, tenantID, resourceGroupNam
 	}, nil
 }
 
-//CheckAccess - makes a call to Azure to get the registry information.
+//CheckAccess makes a call to Azure to get the registry information.
 // If that succeedes. check push access to registry as a standard v2 repository
 // using DockerAuth
 func (a *Azure) CheckAccess(Repository string, scope Scope) (bool, error) {
@@ -62,7 +62,7 @@ func (a *Azure) CheckAccess(Repository string, scope Scope) (bool, error) {
 
 	//Now validate push access to registry using clientId and clientSecret
 	dockerAuth := &DockerAuth{username: a.Username(), password: a.Password()}
-	regURL, err := url.Parse("https://" + a.loginServer + "/v2/")
+	regURL, err := url.Parse(fmt.Sprintf("https://%s/v2/", a.loginServer))
 	if err != nil {
 		return false, err
 	}
@@ -80,17 +80,17 @@ func (a *Azure) CheckAccess(Repository string, scope Scope) (bool, error) {
 	return true, nil
 }
 
-//Password - returns password for the registry (clientSecret)
+//Password returns password for the registry (clientSecret)
 func (a *Azure) Password() string {
 	return a.dockerPassword
 }
 
-//Username - returns username for the registry (cliendId)
+//Username returns username for the registry (cliendId)
 func (a *Azure) Username() string {
 	return a.dockerUsername
 }
 
-//Repository - returns "taggable" repository name
+//Repository returns "taggable" repository name
 func (a *Azure) Repository(repository string) string {
 	return fmt.Sprintf("%s/%s", a.loginServer, repository)
 }
