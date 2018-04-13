@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/wercker/docker-reg-client/registry"
@@ -30,22 +31,31 @@ func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) 
 	client := registry.NewClient()
 	client.BaseURL = d.RegistryURL
 	if scope == Push {
-		_, err := client.Hub.GetWriteToken(name, auth)
+		tokenAuth, err := client.Hub.GetWriteToken(name, auth)
 		if err != nil {
 			return false, err
+		}
+		if tokenAuth.Token == "" {
+			return false, fmt.Errorf("\nNot authorized to push to %s%s. Please check username/password and registry/repository values", d.RegistryURL.String(), name)
 		}
 		return true, nil
 	} else if scope == Pull {
 		if d.username != "" {
-			_, err := client.Hub.GetReadTokenWithAuth(name, auth)
+			tokenAuth, err := client.Hub.GetReadTokenWithAuth(name, auth)
 			if err != nil {
 				return false, err
 			}
+			if tokenAuth.Token == "" {
+				return false, fmt.Errorf("\nNot authorized to pull from %s%s. Please check username/password and registry/repository values", d.RegistryURL.String(), name)
+			}
 			return true, nil
 		} else {
-			_, err := client.Hub.GetReadToken(name)
+			tokenAuth, err := client.Hub.GetReadToken(name)
 			if err != nil {
 				return false, err
+			}
+			if tokenAuth.Token == "" {
+				return false, fmt.Errorf("\nNot authorized to pull from %s%s. Please check registry/repository values and any authentication requirements for the registry", d.RegistryURL.String(), name)
 			}
 			return true, nil
 		}
