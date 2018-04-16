@@ -6,10 +6,11 @@ import:
   subpackages:
   - reference
 - package: github.com/Azure/azure-sdk-for-go
-  version: d05c22dc3f9fdd2ec6e3593839fdd44df17f2de5
+  version: 56332fec5b308fbb6615fa1af6117394cdba186d
   subpackages:
-  - arm/containerregistry
+  - services/containerregistry/mgmt/2017-10-01/containerregistry
+  - services/authorization/mgmt/2015-07-01/authorization
 - package: github.com/Azure/go-autorest
-  version: 0c7d3adb1d6992a173eedd673f44698fe2c901be
+  version: 90128b0cbed977972cdf104474875758e9fe97d0
   subpackages:
   - autorest/azure
