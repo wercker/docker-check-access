@@ -36,7 +36,7 @@ func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) 
 			return false, err
 		}
 		if tokenAuth.Token == "" {
-			return false, fmt.Errorf("\nNot authorized to push to %s%s. Please check username/password and registry/repository values", d.RegistryURL.String(), name)
+			return false, fmt.Errorf("Not authorized to push to %s%s. Please check username/password and registry/repository values", d.RegistryURL.String(), name)
 		}
 		return true, nil
 	} else if scope == Pull {
@@ -46,7 +46,7 @@ func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) 
 				return false, err
 			}
 			if tokenAuth.Token == "" {
-				return false, fmt.Errorf("\nNot authorized to pull from %s%s. Please check username/password and registry/repository values", d.RegistryURL.String(), name)
+				return false, fmt.Errorf("Not authorized to pull from %s%s. Please check username/password and registry/repository values", d.RegistryURL.String(), name)
 			}
 			return true, nil
 		} else {
@@ -55,7 +55,7 @@ func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) 
 				return false, err
 			}
 			if tokenAuth.Token == "" {
-				return false, fmt.Errorf("\nNot authorized to pull from %s%s. Please check registry/repository values and any authentication requirements for the registry", d.RegistryURL.String(), name)
+				return false, fmt.Errorf("Not authorized to pull from %s%s. Please check registry/repository values and any authentication requirements for the registry", d.RegistryURL.String(), name)
 			}
 			return true, nil
 		}
