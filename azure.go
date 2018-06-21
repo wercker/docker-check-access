@@ -1,10 +1,7 @@
 package auth
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	"net/url"
 
 	"github.com/Azure/azure-sdk-for-go/services/authorization/mgmt/2015-07-01/authorization"
 	"github.com/Azure/azure-sdk-for-go/services/containerregistry/mgmt/2017-10-01/containerregistry"
@@ -43,41 +40,6 @@ func NewAzure(clientID, clientSecret, subscriptionID, tenantID, resourceGroupNam
 		dockerUsername:    clientID,
 		dockerPassword:    clientSecret,
 	}, nil
-}
-
-//CheckAccess makes a call to Azure to get the registry information.
-// If that succeedes. check push access to registry as a standard v2 repository
-// using DockerAuth
-func (a *Azure) CheckAccess(Repository string, scope Scope) (bool, error) {
-	regClient := containerregistry.NewRegistriesClient(a.subscriptionID)
-	regClient.Authorizer = a.authorizer
-	registry, err := regClient.Get(context.Background(), a.resourceGroupName, a.registryName)
-	if err != nil {
-		return false, err
-	}
-
-	if *registry.LoginServer != a.loginServer {
-		return false, errors.New("LoginServer in azure " + *registry.Name + " not same as provided in input: " + a.loginServer)
-	}
-
-	//Now validate push access to registry using clientId and clientSecret
-	dockerAuth := &DockerAuth{username: a.Username(), password: a.Password()}
-	regURL, err := url.Parse(fmt.Sprintf("https://%s/v2/", a.loginServer))
-	if err != nil {
-		return false, err
-	}
-
-	dockerAuth.RegistryURL = regURL
-	ok, err := dockerAuth.CheckAccess(Repository, scope)
-	if err != nil {
-		return false, err
-	}
-
-	if !ok {
-		return false, errors.New("No push access to the registry")
-	}
-
-	return true, nil
 }
 
 //Password returns password for the registry (clientSecret)

@@ -143,31 +143,6 @@ func (a AmazonAuth) Repository(repo string) string {
 	return fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com/%s", a.registryID, a.region, repo)
 }
 
-// CheckAccess checks to see if the current amazon user has permissions defined by scope on the given repository
-func (a *AmazonAuth) CheckAccess(Repository string, scope Scope) (bool, error) {
-	now := time.Now().Unix()
-	if a.token == "" || now > a.tokenExpire.Unix() {
-		err := a.getAuthToken()
-		if err != nil {
-			return false, err
-		}
-	}
-	if !a.strictIAM {
-		// since we we're able to get a token, we know that the user has access to the repository to a certain degree, don't parse through IAM policies and return true. will lead to false positives.
-		return true, nil
-	}
-	//check to see if the iam policys let the user access the repo
-	canAccess, err := a.getPolicyAccess(scope)
-	if err != nil {
-		return false, err
-	}
-	if canAccess {
-		return canAccess, nil
-	}
-	//if that doesnt work try looking at the resouce policy and return the results from there
-	return a.getResourceAccess(Repository, scope)
-}
-
 type PolicyText struct {
 	Version   string      `json:"Version"`
 	Statement []Statement `json:"Statement"`
