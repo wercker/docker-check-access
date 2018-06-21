@@ -2,8 +2,6 @@ package auth
 
 import (
 	"net/url"
-
-	"github.com/wercker/docker-reg-client/registry"
 )
 
 //DockerAuthV1 implements Authenticator. It's purpose is to check whether a user has access to a Docker container by checking against a remote registry provider that still uses the Docker Version 1 registry specification.
@@ -16,39 +14,4 @@ func NewDockerAuthV1(registryURL *url.URL, username, password string) DockerAuth
 	return DockerAuthV1{
 		DockerAuth: NewDockerAuth(registryURL, username, password),
 	}
-}
-
-func (d DockerAuthV1) CheckAccess(repository string, scope Scope) (bool, error) {
-	name, err := d.normalizeRepo(repository)
-	if err != nil {
-		return false, err
-	}
-	auth := registry.BasicAuth{
-		Username: d.username,
-		Password: d.password,
-	}
-	client := registry.NewClient()
-	client.BaseURL = d.RegistryURL
-	if scope == Push {
-		_, err := client.Hub.GetWriteToken(name, auth)
-		if err != nil {
-			return false, err
-		}
-		return true, nil
-	} else if scope == Pull {
-		if d.username != "" {
-			_, err := client.Hub.GetReadTokenWithAuth(name, auth)
-			if err != nil {
-				return false, err
-			}
-			return true, nil
-		} else {
-			_, err := client.Hub.GetReadToken(name)
-			if err != nil {
-				return false, err
-			}
-			return true, nil
-		}
-	}
-	return true, nil
 }

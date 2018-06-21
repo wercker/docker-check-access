@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/docker/distribution/reference"
 )
@@ -49,88 +48,6 @@ func (d *DockerAuth) normalizeRepo(repository string) (string, error) {
 		return "", err
 	}
 	return reference.Path(n), nil
-}
-
-//CheckAccess takes a repository and tries to get a JWT token from a docker registry 2 provider, if it succeeds in getting the token, we return true. If there is a failure grabbing the token, we return false and an error explaning what went wrong.
-//CheckAccess uses the following flow to get the token: https://docs.docker.com/registry/spec/auth/jwt
-//Meaning, it first makes a call without any authentication/authorization parameters to check if the registry
-//requires any authentication at all, and if that doesn't work it tries to request a token from the challenge in the Www-Authenticate header.
-func (d *DockerAuth) CheckAccess(repository string, scope Scope) (bool, error) {
-	httpClient := http.DefaultClient
-
-	repo, err := d.normalizeRepo(repository)
-	if err != nil {
-		return false, err
-	}
-
-	req, err := d.getRequest(repo, scope)
-	if err != nil {
-		return false, err
-	}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-	//handle authErrors
-	if resp.StatusCode == 404 {
-		return false, ErrRepoNotFound
-	}
-	if resp.StatusCode == 401 {
-		authString := resp.Header.Get("Www-Authenticate")
-		parts := strings.Split(authString, " ")
-		parts = parts[1:]
-		tokens := strings.SplitN(parts[0], ",", 3)
-		//we have a slice like
-		//[realm="https://auth.docker.io/token" service="registry.docker.io" scope="repository:faiq/test-faiq:push,pull"]
-		//we want the pieces so time do some splitting & cleaning
-		var argsToGetToken []string
-		for _, tok := range tokens {
-			spl := strings.Split(tok, "=")
-			toClean := spl[1]
-			cleaned := strings.Trim(toClean, "\"")
-			argsToGetToken = append(argsToGetToken, cleaned)
-		}
-		var err error
-		if len(argsToGetToken) == 3 {
-			err = d.getToken(argsToGetToken[0], argsToGetToken[1], argsToGetToken[2])
-		} else if len(argsToGetToken) == 2 {
-			err = d.getToken(argsToGetToken[0], argsToGetToken[1], "")
-		}
-
-		if err != nil {
-			return false, err
-		}
-		//now we have a token, so we try the request again
-		req, err := d.getRequest(repo, scope)
-		if err != nil {
-			return false, err
-		}
-		d.authenticate(req)
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			return false, err
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode == 200 || resp.StatusCode == 202 {
-			return true, nil
-		}
-
-		if resp.StatusCode == 404 {
-			return false, ErrRepoNotFound
-		}
-
-		if resp.StatusCode == 401 {
-			return false, ErrRepoNotAuthorized
-		}
-	}
-	// if the remote server gives us the go ahead, we're fine
-	// used for registries like GCR which might use some other sort of authz strategy
-	if resp.StatusCode == 200 || resp.StatusCode == 202 {
-		return true, nil
-
-	}
-	return false, ErrUnexpectedResponse
 }
 
 func (d *DockerAuth) Username() string {
